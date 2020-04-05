@@ -1,23 +1,17 @@
 const express=require('express')
+const auth=require('../middleware/auth')
 const User=require('../model/user')
 const router=new express.Router()
 
-router.post('/users',async (req,res)=>{
-    const user=new User(req.body)
-     try
-     {
-         await user.save()
-         res.status(201).send(user)
-     }catch(e)
-     {
-         res.status(400).send(e);
-     }
-     
+router.post('/users/me',auth,async (req,res)=>{
+    res.send(req.user)
  })
- router.post('/users/login', async (req,res)=>{
+ router.post('/users/login',auth, async (req,res)=>{
     try{
         let user=await User.findByEmailPass(req.body.email,req.body.password)
-        res.status(201).send(user)
+        const token=await user.generateAuthoToken()
+        res.send({user,token})
+        
     }
     catch(e)
     {
@@ -25,7 +19,7 @@ router.post('/users',async (req,res)=>{
     }
 
  })
- router.get('/users',async (req,res)=>{
+ router.get('/users',auth,async (req,res)=>{
     try 
     {
         let users=await User.find({});
