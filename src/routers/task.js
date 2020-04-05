@@ -31,7 +31,9 @@ router.patch('/tasks/:id',async(req,res)=>{
       return  res.status(404).send('some property is not invalid')
     }
    try{
-     let taskUpdate= await Task.findByIdAndUpdate(id,req.body,{new:true,runValidators:true})
+     let taskUpdate= await Task.findById(id)
+     updates.forEach(update=>taskUpdate[update]=req.body[update])
+    await taskUpdate.save()
      res.status(200).send(taskUpdate)
    }catch(e)
    {

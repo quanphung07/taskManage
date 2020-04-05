@@ -14,6 +14,17 @@ router.post('/users',async (req,res)=>{
      }
      
  })
+ router.post('/users/login', async (req,res)=>{
+    try{
+        let user=await User.findByEmailPass(req.body.email,req.body.password)
+        res.status(201).send(user)
+    }
+    catch(e)
+    {
+        res.status(404).send('error'+e)
+    }
+
+ })
  router.get('/users',async (req,res)=>{
     try 
     {
@@ -47,13 +58,17 @@ router.patch('/users/:id',async (req,res)=>{
    
     try
     {
-        let userUpdate=await User.findByIdAndUpdate(id,req.body,{new:true,runValidators:true})
-        if(!userUpdate)
+        const user=await User.findById(req.params.id)
+        updates.forEach(update=>user[update]=req.body[update])
+        await user.save();
+
+        // let userUpdate=await User.findByIdAndUpdate(id,req.body,{new:true,runValidators:true})
+        if(!user)
         {
             res.status(404).send()
         }else 
         {
-            res.status(201).send(userUpdate)
+            res.status(201).send(user)
         }
       
     }catch(e)
@@ -61,4 +76,5 @@ router.patch('/users/:id',async (req,res)=>{
         res.status(401).send(e)
     }
 })
+
 module.exports=router
